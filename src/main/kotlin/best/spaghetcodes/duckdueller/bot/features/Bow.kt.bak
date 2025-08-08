@@ -1,0 +1,14 @@
+package best.spaghetcodes.duckdueller.bot.features
+
+/**
+ * Tir à l'arc – interface mix-in avec impl par défaut no-op.
+ */
+interface Bow {
+    /**
+     * Utilise l’arc si la situation s’y prête, puis exécute [after].
+     * Implémentation par défaut : on enchaîne directement.
+     */
+    fun useBow(maxDistance: Double, after: () -> Unit = {}) {
+        after()
+    }
+}
