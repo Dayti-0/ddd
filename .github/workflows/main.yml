@@ -1,0 +1,51 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # (Optionnel mais recommandé) Vérif sécurité du wrapper Gradle
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Set up JDK 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Setup Gradle caching
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build
+        run: ./gradlew --no-daemon clean build --stacktrace
+
+      - name: Upload artifacts (JARs)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-libs
+          path: |
+            build/libs/*.jar
+          retention-days: 14
